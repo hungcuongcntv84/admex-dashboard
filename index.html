@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>admeX — Campaign Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ══════════════════════════════════════════
+   ADMEX DESIGN SYSTEM — from Guideline sheet
+   Primary greens: #46d360 (brand), #28a845 (dark)
+   Supporting palette anchored to bubble/interest colors
+══════════════════════════════════════════ */
+:root {
+  --bg:    #f2f4f3;
+  --bg2:   #ffffff;
+  --bg3:   #eaf6ec;
+  --bg4:   #d8eddb;
+  --bdr:   rgba(0,0,0,0.07);
+  --bdr2:  rgba(0,0,0,0.13);
+  --ink:   #0f1a11;
+  --ink2:  rgba(15,26,17,0.55);
+  --ink3:  rgba(15,26,17,0.32);
+  /* Palette */
+  --g1: #46d360; --g1d: #28a845; --g1b: rgba(70,211,96,.11);
+  --g2: #3ee95e; --g3: #31be4b;
+  --c2: #1b4ed8; --c2b: rgba(27,78,216,.11);
+  --c3: #d97706; --c3b: rgba(217,119,6,.11);
+  --c4: #e11d48; --c4b: rgba(225,29,72,.11);
+  --c5: #0d9488; --c5b: rgba(13,148,136,.11);
+  --c6: #7c3aed; --c6b: rgba(124,58,237,.11);
+  --c7: #ea580c; --c7b: rgba(234,88,12,.11);
+  --c8: #db2777; --c8b: rgba(219,39,119,.11);
+  --c9: #475569; --c9b: rgba(71,85,105,.11);
+  --serif: 'Merriweather', Georgia, serif;
+  --sans:  'Plus Jakarta Sans', Arial, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+  --r: 8px;
+  --sh:  0 1px 3px rgba(0,0,0,.07), 0 4px 14px rgba(0,0,0,.04);
+  --sh2: 0 2px 8px rgba(0,0,0,.09), 0 8px 28px rgba(0,0,0,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13px;line-height:1.55;min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:300;box-shadow:0 1px 0 var(--bdr),0 2px 8px rgba(0,0,0,.04)}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.hdr-div{width:1px;height:18px;background:var(--bdr2)}
+.hdr-tag{font-family:var(--mono);font-size:10px;color:var(--ink2);letter-spacing:.05em}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.chip{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase}
+.chip-g{background:var(--g1b);color:var(--g1d);border:1px solid rgba(70,211,96,.28)}
+.chip-a{background:var(--c3b);color:var(--c3);border:1px solid rgba(217,119,6,.22)}
+
+/* ── TABS ── */
+.tab-nav{background:var(--bg2);border-bottom:2px solid var(--bdr);padding:0 28px;display:flex;gap:0;position:sticky;top:54px;z-index:299}
+.tab-btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:0 22px;height:44px;border:none;background:none;cursor:pointer;color:var(--ink2);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;letter-spacing:-.1px}
+.tab-btn:hover{color:var(--ink);border-bottom-color:var(--bdr2)}
+.tab-btn.active{color:var(--g1d);border-bottom-color:var(--g1)}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ── FILTER BAR (per-tab) ── */
+.fbar{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:0 28px;display:flex;align-items:center;gap:10px;height:46px;flex-wrap:wrap}
+.flbl{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.fsep{width:1px;height:18px;background:var(--bdr2);flex-shrink:0}
+.sw{position:relative;flex-shrink:0}
+.sw select{appearance:none;background:var(--bg3);border:1px solid var(--bdr2);border-radius:5px;padding:4px 26px 4px 10px;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--ink);cursor:pointer;outline:none;height:28px;transition:all .15s}
+.sw select:hover,.sw select:focus{border-color:rgba(70,211,96,.4);box-shadow:0 0 0 2px var(--g1b)}
+.sw::after{content:'▾';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--ink2);pointer-events:none}
+.fbtn{font-family:var(--mono);font-size:10px;background:none;border:1px solid var(--bdr2);border-radius:4px;padding:4px 10px;cursor:pointer;color:var(--ink2);letter-spacing:.05em;transition:all .15s;height:28px}
+.fbtn:hover{border-color:var(--g1);color:var(--g1d)}
+#fstatus1,#fstatus2,#fstatus3{font-family:var(--mono);font-size:10px;color:var(--g1d);font-weight:600;white-space:nowrap}
+
+/* ── LOCAL FILTER (above chart groups) ── */
+.lf{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.lf-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);white-space:nowrap}
+.lf select{appearance:none;background:var(--bg3);border:1px solid var(--bdr2);border-radius:4px;padding:3px 22px 3px 8px;font-family:var(--sans);font-size:11px;font-weight:500;color:var(--ink);cursor:pointer;outline:none;height:24px;transition:all .15s;position:relative}
+.lf select:focus,.lf select:hover{border-color:var(--g1);box-shadow:0 0 0 2px var(--g1b)}
+.lf-sw{position:relative}
+.lf-sw::after{content:'▾';position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--ink2);pointer-events:none}
+
+/* ── MAIN ── */
+.main{padding:20px 28px;max-width:1440px;margin:0 auto}
+
+/* ── SECTION LABEL ── */
+.slbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:24px 0 12px;display:flex;align-items:center;gap:10px}
+.slbl::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.slbl-dot{width:6px;height:6px;border-radius:50%;background:var(--g1);flex-shrink:0}
+
+/* ── PANEL ── */
+.panel{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);transition:box-shadow .2s,border-color .2s}
+.panel:hover{box-shadow:var(--sh2);border-color:rgba(70,211,96,.22)}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
+.pt{font-family:var(--serif);font-size:11px;color:var(--ink);font-weight:700;font-style:italic}
+.pv{font-family:var(--mono);font-size:11px;color:var(--g1d);font-weight:600}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+
+/* ── CAMPAIGN BAND ── */
+.cband{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);display:grid;overflow:hidden;box-shadow:var(--sh)}
+.cc{padding:14px 18px;border-right:1px solid var(--bdr)}
+.cc:last-child{border-right:none}
+.cclbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:3px;font-weight:500}
+.ccval{font-weight:700;font-size:20px;line-height:1.1;margin-bottom:2px}
+.ccsub{font-size:11px;color:var(--ink2)}
+
+/* ── KPI ── */
+.kpi{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px 14px 20px;box-shadow:var(--sh);position:relative;overflow:hidden;transition:box-shadow .2s}
+.kpi:hover{box-shadow:var(--sh2)}
+.kacc{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:var(--r) 0 0 var(--r)}
+.klbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:5px;font-weight:500}
+.knum{font-weight:700;font-size:22px;line-height:1;margin-bottom:3px}
+.ksub{font-size:11px;color:var(--ink2)}
+
+/* ── PROGRESS ── */
+.pt-track{height:4px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-top:6px}
+.pt-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+
+/* ── LEGEND ── */
+.leg{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.li{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2)}
+.ll{width:14px;height:2.5px;border-radius:2px;flex-shrink:0}
+
+/* ── DONUT LEGEND ── */
+.dlw{display:flex;align-items:center;gap:16px}
+.dlg{flex:1;display:flex;flex-direction:column;gap:7px}
+.dli{display:flex;align-items:center;gap:6px}
+.dlidot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dliname{font-size:12px;color:var(--ink2);flex:1}
+.dlival{font-family:var(--mono);font-size:12px;font-weight:700}
+
+/* ── AGE ROWS ── */
+.ar{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)}
+.ar:last-child{border-bottom:none}
+.arlbl{font-family:var(--mono);font-size:10px;color:var(--ink3);width:38px;flex-shrink:0;font-weight:500}
+.arbars{display:flex;align-items:center;gap:3px;flex:1}
+.abm{height:16px;background:rgba(27,78,216,.62);border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;min-width:4px}
+.abf{height:16px;background:rgba(225,29,72,.52);border-radius:3px;display:flex;align-items:center;padding-left:4px;min-width:4px}
+.abpct{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.9);font-weight:500}
+
+/* ── FUNNEL ── */
+.fr{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.fr:last-child{border-bottom:none}
+.frlbl{font-size:12px;color:var(--ink2);font-weight:600}
+.frsub{font-size:10px;color:var(--ink3);margin-top:1px}
+.frnum{font-weight:700;font-size:18px;text-align:right}
+.frnote{font-size:10px;color:var(--ink3);text-align:right;font-family:var(--mono)}
+
+/* ── LOC / REGION ROWS ── */
+.locr{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--bdr)}
+.locr:last-child{border-bottom:none}
+.locico{font-size:13px;width:18px;text-align:center;flex-shrink:0}
+.locname{font-size:12px;color:var(--ink2);flex:1;font-weight:500}
+.locbar{width:70px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.locfill{height:100%;border-radius:2px}
+.locval{font-family:var(--mono);font-size:11px;font-weight:700;width:30px;text-align:right}
+.regr{display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid var(--bdr)}
+.regr:last-child{border-bottom:none}
+.regname{font-size:12px;color:var(--ink2);flex:1;font-weight:500}
+.regbar{flex:1;max-width:100px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.regfill{height:100%;border-radius:2px}
+.regval{font-family:var(--mono);font-size:11px;font-weight:700;width:80px;text-align:right}
+
+/* ── SOURCE ROWS ── */
+.srcr{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)}
+.srcr:last-child{border-bottom:none}
+.srcname{font-size:12px;color:var(--ink2);width:75px;font-weight:500}
+.srcbar{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.srcfill{height:100%;border-radius:2px}
+.srcnum{font-family:var(--mono);font-size:12px;font-weight:700;width:28px;text-align:right}
+
+/* ── BUDGET ROWS ── */
+.brow{display:grid;grid-template-columns:1fr 70px 50px;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)}
+.brow:last-child{border-bottom:none}
+.bcat{font-size:12px;color:var(--ink2);font-weight:500}
+.bval{font-family:var(--mono);font-size:11px;text-align:right;font-weight:700}
+.bpct{font-family:var(--mono);font-size:10px;color:var(--ink3);text-align:right}
+.mbt2{height:3px;background:var(--bg4);border-radius:2px;margin-top:2px}
+.mbt2f{height:100%;border-radius:2px;background:var(--g1)}
+
+/* ── CHANNEL TABLE ── */
+.mr{display:grid;grid-template-columns:130px 1fr 75px 80px 65px;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr)}
+.mr:last-child{border-bottom:none}
+.mname{font-size:12px;color:var(--ink2);font-weight:500}
+.mbt{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.mbf{height:100%;border-radius:3px}
+.mv{font-family:var(--mono);font-size:10px;color:var(--ink2);text-align:right}
+.mv.hi{color:var(--g1d);font-weight:700}
+
+/* ── BUBBLE ── */
+.bwrap{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:2px 0}
+.bubble{display:inline-flex;align-items:center;justify-content:center;border-radius:20px;font-weight:600;cursor:default;transition:transform .15s,box-shadow .15s;white-space:nowrap;border:1.5px solid transparent}
+.bubble:hover{transform:scale(1.07);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+
+/* ── DP LCD STAT CARDS ── */
+.dp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.dp-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.dp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.dp-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:4px;font-weight:500}
+.dp-val{font-weight:700;font-size:22px;line-height:1;margin-bottom:2px}
+.dp-sub{font-size:11px;color:var(--ink2)}
+
+/* NFC RATE */
+.nfc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nfc-item{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.nfc-ico{font-size:16px}
+.nfc-region{font-size:11px;color:var(--ink2);font-weight:500;flex:1}
+.nfc-val{font-family:var(--mono);font-size:14px;font-weight:700}
+
+/* ── SOV BADGE ── */
+.sov-badge{display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:50%;border:3px solid var(--c3);font-weight:700;font-size:24px;color:var(--c3);background:var(--c3b);flex-shrink:0}
+
+/* ── INSIGHT SECTION ── */
+.ins-hdr{background:linear-gradient(135deg,#0f1a11 0%,#1a3320 50%,#0d2418 100%);border-radius:var(--r);padding:24px 28px;margin-bottom:14px;position:relative;overflow:hidden}
+.ins-hdr::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(70,211,96,.07)}
+.ins-eye{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--g1);margin-bottom:6px;font-weight:500}
+.ins-title{font-family:var(--serif);font-size:18px;color:#fff;line-height:1.35;margin-bottom:8px}
+.ins-sub{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6}
+.ins-grid{display:grid;gap:12px;margin-bottom:12px}
+.ins-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.ins-grid.cols2{grid-template-columns:1fr 1fr}
+.ic{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;box-shadow:var(--sh);position:relative;overflow:hidden;transition:box-shadow .2s}
+.ic:hover{box-shadow:var(--sh2)}
+.ic::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.ic.c1::before{background:var(--g1)}.ic.c2::before{background:var(--c2)}.ic.c3::before{background:var(--c3)}.ic.c4::before{background:var(--c4)}.ic.c5::before{background:var(--c5)}.ic.c6::before{background:var(--c6)}
+.ic-ico{font-size:22px;margin-bottom:8px}
+.ic-title{font-family:var(--serif);font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;line-height:1.3}
+.ic-body{font-size:11px;color:var(--ink2);line-height:1.65}
+.ic-body strong{color:var(--ink);font-weight:600}
+.ic-tag{display:inline-block;font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.06em;margin-top:7px;font-weight:500}
+.ins-sum{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sh)}
+.is-title{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.is-title::before{content:'';display:inline-block;width:4px;height:16px;background:var(--g1);border-radius:2px}
+.is-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.is-col-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:8px;font-weight:500}
+.is-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:9px}
+.is-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.is-text{font-size:12px;color:var(--ink2);line-height:1.6}
+.is-text strong{color:var(--ink);font-weight:600}
+
+/* ── DIVIDER ── */
+.div-h{height:1px;background:var(--bdr);margin:20px 0}
+
+/* ── ANIM ── */
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade{opacity:0;animation:fu .4s ease forwards}
+.fade:nth-child(1){animation-delay:.04s}.fade:nth-child(2){animation-delay:.08s}.fade:nth-child(3){animation-delay:.12s}.fade:nth-child(4){animation-delay:.16s}.fade:nth-child(5){animation-delay:.20s}
+
+footer{text-align:center;padding:18px 28px;border-top:1px solid var(--bdr);font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.05em;margin-top:28px}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="hdr">
+  <div class="hdr-l">
+    <img id="logo-img" src="" alt="admeX" style="height:30px;width:auto;display:block">
+    <div class="hdr-div"></div>
+    <div class="hdr-tag">Campaign Dashboard Report</div>
+  </div>
+  <div class="hdr-r">
+    <div class="hdr-tag">01/03/2026 — 07/05/2026 · 67 ngày</div>
+    <span class="chip chip-g">✓ 100% Complete</span>
+    <span class="chip chip-a">[Campaign] / [Brand]</span>
+  </div>
+</div>
+
+<!-- ═══ TAB NAV ═══ -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab(0,this)">📊 Tổng quan</button>
+  <button class="tab-btn" onclick="switchTab(1,this)">🖥 Digital Online</button>
+  <button class="tab-btn" onclick="switchTab(2,this)">📡 Digital Offline</button>
+</div>
+
+<!-- ════════════════════════════════════
+     TAB 1 — TỔNG QUAN
+════════════════════════════════════ -->
+<div id="tab0" class="tab-pane active">
+
+  <!-- Filter bar Tab 1 -->
+  <div class="fbar">
+    <span class="flbl">Thời gian</span>
+    <div class="fsep"></div>
+    <div class="sw"><select id="t1-time" onchange="t1Filter()">
+      <option value="all">Toàn chiến dịch</option>
+      <option value="m3">Tháng 3/2026</option>
+      <option value="m4">Tháng 4/2026</option>
+      <option value="m5">Tháng 5/2026</option>
+      <option value="w1">Tuần 1 (01–07/03)</option>
+      <option value="w2">Tuần 2 (08–14/03)</option>
+      <option value="w3">Tuần 3 (15–21/03)</option>
+      <option value="w4">Tuần 4 (22–28/03)</option>
+      <option value="w5">Tuần 5–6 (29/03–11/04)</option>
+      <option value="w6">Tuần 7–8 (12–25/04)</option>
+      <option value="w7">Cuối chiến dịch (26/04–07/05)</option>
+    </select></div>
+    <button class="fbtn" onclick="resetT1()">↺ Reset</button>
+    <span id="fstatus1"></span>
+  </div>
+
+  <div class="main">
+
+    <!-- CAMPAIGN OVERVIEW -->
+    <div class="slbl"><div class="slbl-dot"></div>Tổng quan chiến dịch</div>
+    <div class="cband fade" style="grid-template-columns:1fr 1fr 1fr 1fr 200px">
+      <div class="cc"><div class="cclbl">Tổng ngân sách</div><div class="ccval" style="color:var(--c3)">5,607,200,000</div><div class="ccsub">VNĐ · 100% giải ngân</div></div>
+      <div class="cc"><div class="cclbl">Total Reach</div><div class="ccval" style="color:var(--c2)">48,615,804</div><div class="ccsub">Unique audiences</div></div>
+      <div class="cc"><div class="cclbl">Total Impressions</div><div class="ccval" style="color:var(--c3)">88,060,125</div><div class="ccsub">Tất cả kênh</div></div>
+      <div class="cc"><div class="cclbl">Qualified Leads</div><div class="ccval" style="color:var(--g1d)">104</div><div class="ccsub">Raw 300 · Conv ~33.3%</div></div>
+      <div class="cc" style="display:flex;flex-direction:column;justify-content:center;gap:5px">
+        <div class="cclbl">Tiến độ tổng thể</div>
+        <div style="font-weight:700;font-size:26px;color:var(--g1d);line-height:1">100%</div>
+        <div class="pt-track"><div class="pt-fill" style="width:0%;background:var(--g1)" data-w="100%"></div></div>
+        <div class="ccsub">Hoàn thành · 67/67 ngày</div>
+      </div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="g5" style="margin-top:12px">
+      <div class="kpi fade"><div class="kacc" style="background:var(--g1)"></div><div class="klbl">Total Clicks</div><div class="knum" style="color:var(--g1d)">579,524</div><div class="ksub">Avg CTR 0.09–1.80%</div></div>
+      <div class="kpi fade"><div class="kacc" style="background:var(--c2)"></div><div class="klbl">Total Views</div><div class="knum" style="color:var(--c2)">11,179,470</div><div class="ksub">Video + PR + Display</div></div>
+      <div class="kpi fade"><div class="kacc" style="background:var(--c5)"></div><div class="klbl">Offline Traffic</div><div class="knum" style="color:var(--c5)">6,134,554</div><div class="ksub">LCD + DOOH + WiFi</div></div>
+      <div class="kpi fade"><div class="kacc" style="background:var(--c6)"></div><div class="klbl">Total Engagement</div><div class="knum" style="color:var(--c6)">645,542</div><div class="ksub">Facebook tổng hợp</div></div>
+      <div class="kpi fade"><div class="kacc" style="background:var(--c3)"></div><div class="klbl">Avg SOV</div><div class="knum" style="color:var(--c3)">30%</div><div class="ksub">ADMICRO & VnExpress</div></div>
+    </div>
+
+    <!-- BUDGET OVERVIEW -->
+    <div class="slbl"><div class="slbl-dot"></div>Ngân sách · Phân bổ</div>
+    <div class="g3">
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Chi tiết ngân sách hạng mục</span><span class="pv">5,607.2M VNĐ</span></div>
+        <div id="t1-budget-rows"></div>
+      </div>
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Tỷ lệ ngân sách theo hình thức mua</span></div>
+        <canvas id="t1-buyTypeChart" height="170"></canvas>
+      </div>
+      <div class="panel fade">
+        <div class="ph"><span class="pt">SOV — Share of Voice Campaign</span></div>
+        <div style="display:flex;align-items:center;gap:20px;padding:8px 0">
+          <div style="text-align:center;flex-shrink:0">
+            <div class="sov-badge">30%</div>
+            <div style="margin-top:20px;font-size:11px;color:var(--ink2);max-width:90px;line-height:1.4;text-align:center">Tỉ lệ SOV trên ADMICRO & VnExpress</div>
+          </div>
+          <div style="flex:1">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px">
+              <div style="background:var(--c3b);border:1px solid rgba(217,119,6,.2);border-radius:5px;padding:9px 11px">
+                <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;font-weight:500">SOV Campaign</div>
+                <div style="font-weight:700;font-size:22px;color:var(--c3)">30%</div>
+              </div>
+              <div style="background:var(--g1b);border:1px solid rgba(70,211,96,.2);border-radius:5px;padding:9px 11px">
+                <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;font-weight:500">Avg SOV / Ngày</div>
+                <div style="font-weight:700;font-size:22px;color:var(--g1d)">30%</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--ink2);line-height:1.65">SOV 30% duy trì ổn định toàn chiến dịch trong bối cảnh nhiều dự án BĐS cao cấp cạnh tranh hiển thị gay gắt — giữ vững tiếng nói thương hiệu không bị lấn át.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDIENCE ONLINE -->
+    <div class="slbl"><div class="slbl-dot"></div>Audience — Digital Online</div>
+    <div class="g3">
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Phân bổ giới tính — Online</span></div>
+        <div style="display:flex;gap:16px;align-items:center;justify-content:center;padding:8px 0">
+          <canvas id="t1-gOnline" width="100" height="100"></canvas>
+          <div class="dlg">
+            <div class="dli"><div class="dlidot" style="background:var(--c2)"></div><span class="dliname">Male</span><span class="dlival" style="color:var(--c2)">65%</span></div>
+            <div class="dli"><div class="dlidot" style="background:var(--c4)"></div><span class="dliname">Female</span><span class="dlival" style="color:var(--c4)">35%</span></div>
+            <div style="font-size:10px;color:var(--ink3);margin-top:5px;font-family:var(--mono)">Core: 35–45 tuổi</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Phân bổ độ tuổi — Digital Online</span></div>
+        <div class="leg"><div class="li"><span style="width:10px;height:10px;background:rgba(27,78,216,.62);border-radius:2px;display:inline-block"></span>&nbsp;Male 65%</div><div class="li"><span style="width:10px;height:10px;background:rgba(225,29,72,.52);border-radius:2px;display:inline-block"></span>&nbsp;Female 35%</div></div>
+        <div id="t1-ageOnline"></div>
+      </div>
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Interests &amp; Profile — Online</span><span style="font-size:10px;color:var(--ink3);font-family:var(--mono)">Size = tỉ trọng</span></div>
+        <div id="t1-bubbleOnline" class="bwrap"></div>
+      </div>
+    </div>
+
+    <!-- AUDIENCE OFFLINE -->
+    <div class="slbl"><div class="slbl-dot"></div>Audience — Digital Offline</div>
+    <div class="g3">
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Phân bổ giới tính — Offline</span></div>
+        <div style="display:flex;gap:16px;align-items:center;justify-content:center;padding:8px 0">
+          <canvas id="t1-gOffline" width="100" height="100"></canvas>
+          <div class="dlg">
+            <div class="dli"><div class="dlidot" style="background:var(--c2)"></div><span class="dliname">Nam</span><span class="dlival" style="color:var(--c2)">68%</span></div>
+            <div class="dli"><div class="dlidot" style="background:var(--c4)"></div><span class="dliname">Nữ</span><span class="dlival" style="color:var(--c4)">32%</span></div>
+            <div style="font-size:10px;color:var(--ink3);margin-top:5px;font-family:var(--mono)">Core: 30–45 tuổi</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Phân bổ độ tuổi — Digital Offline</span></div>
+        <div class="leg"><div class="li"><span style="width:10px;height:10px;background:rgba(27,78,216,.62);border-radius:2px;display:inline-block"></span>&nbsp;Nam 68%</div><div class="li"><span style="width:10px;height:10px;background:rgba(225,29,72,.52);border-radius:2px;display:inline-block"></span>&nbsp;Nữ 32%</div></div>
+        <div id="t1-ageOffline"></div>
+      </div>
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Interests &amp; Profile — Offline</span><span style="font-size:10px;color:var(--ink3);font-family:var(--mono)">Size = tỉ trọng</span></div>
+        <div id="t1-bubbleOffline" class="bwrap"></div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE OVERVIEW -->
+    <div class="slbl"><div class="slbl-dot"></div>Hiệu suất · CPM / CPC / CTR</div>
+    <div class="g2">
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Avg CTR (%) — So sánh hạng mục</span></div>
+        <canvas id="t1-ctrChart" height="150"></canvas>
+      </div>
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Avg CPM (VNĐ) — So sánh hạng mục</span></div>
+        <canvas id="t1-cpmChart" height="150"></canvas>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="panel fade">
+        <div class="ph"><span class="pt">Hiệu suất tổng hợp — CPM · CPC · CTR</span><span style="font-size:10px;color:var(--ink3);font-family:var(--mono)">Sorted by CTR ↓</span></div>
+        <div style="display:grid;grid-template-columns:130px 1fr 75px 80px 65px;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--bdr);margin-bottom:3px">
+          <span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500">Kênh</span>
+          <span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500">CTR Bar</span>
+          <span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500;text-align:right">Avg CPM</span>
+          <span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500;text-align:right">Avg CPC</span>
+          <span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500;text-align:right">Avg CTR</span>
+        </div>
+        <div id="t1-chanRows"></div>
+      </div>
+    </div>
+
+    <!-- INSIGHT TAB 1 -->
+    <div class="slbl"><div class="slbl-dot"></div>Insight Report — Đánh giá hiệu quả chiến dịch</div>
+    <div class="ins-hdr">
+      <div class="ins-eye">Campaign Effectiveness Report · admeX Analysis</div>
+      <div class="ins-title">Chiến dịch tiếp cận đúng tệp mục tiêu qua hệ thống<br>điểm chạm Online–Offline tích hợp toàn diện</div>
+      <div class="ins-sub">Tổng hợp từ 67 ngày dữ liệu thực chiến · [Campaign] / [Brand] · 01/03–07/05/2026</div>
+    </div>
+    <div class="ins-grid cols3">
+      <div class="ic c1"><div class="ic-ico">🎯</div><div class="ic-title">In-Target Audience — Đạt chuẩn phân khúc</div><div class="ic-body">Tệp 35–45 tuổi, <strong>Nam 65–68%</strong> cả Online lẫn Offline khớp trực tiếp chân dung HENRYs & EHNWOs — doanh nhân SME, chuyên gia tài chính thu nhập 80–200M/tháng. Placement LCD tại Office Building (645) và Apartment (438) đúng môi trường sống và làm việc của target.</div><span class="ic-tag" style="background:var(--g1b);color:var(--g1d)">✓ On Target</span></div>
+      <div class="ic c2"><div class="ic-ico">📡</div><div class="ic-title">Điểm chạm hiệu quả nhất</div><div class="ic-body"><strong>AdX Collection CTR 1.80%</strong> — cao nhất toàn chiến dịch, contextual targeting đúng lúc khách hàng đọc nội dung tài chính/BĐS. Facebook CPC (1.41%) và CPE (1.20%) cho thấy tệp audience được target chuẩn. Youtube TrueView đạt <strong>3.4M views</strong>, view rate 32–38%.</div><span class="ic-tag" style="background:var(--c2b);color:var(--c2)">↑ High Performance</span></div>
+      <div class="ic c3"><div class="ic-ico">🏗️</div><div class="ic-title">Media Planning — Chiến lược tối ưu</div><div class="ic-body">Cấu trúc O-Display <strong>29.4%</strong> ngân sách đầu tư đúng kênh OOH cao cấp. Sản xuất <strong>16.5%</strong> (iTVC 600M) đảm bảo creative tương xứng phân khúc Luxury. Chiến lược Media Plan được hoạch định chính xác, cân bằng brand building và conversion.</div><span class="ic-tag" style="background:var(--c3b);color:var(--c3)">✓ Strategic</span></div>
+      <div class="ic c4"><div class="ic-ico">📊</div><div class="ic-title">Phủ sóng &amp; Tần suất</div><div class="ic-body"><strong>48.6M unique reach</strong> + <strong>6.1M offline traffic</strong> tạo tổng tiếp xúc đa kênh liên tục. ~88.4M impressions trên 67 ngày đủ tần suất nhắc nhớ cho sản phẩm high-consideration. SOV 30% ổn định giữ vững tiếng nói brand.</div><span class="ic-tag" style="background:var(--c4b);color:var(--c4)">✓ Coverage</span></div>
+      <div class="ic c5"><div class="ic-ico">💡</div><div class="ic-title">Lead Generation — Vượt kế hoạch</div><div class="ic-body"><strong>104 Qualified Leads</strong> vượt target +4%, Conversion Rate ~33.3% cao hơn benchmark ngành BĐS cao cấp (20–28%). Affiliate chiếm <strong>64%</strong> source leads. Cost Per QL: <strong>4,326,923 VNĐ</strong> — hợp lý với giá trị hợp đồng 5–15 tỷ.</div><span class="ic-tag" style="background:var(--c5b);color:var(--c5)">↑ Above Target</span></div>
+      <div class="ic c6"><div class="ic-ico">🔗</div><div class="ic-title">O2O Integration</div><div class="ic-body">Mô hình <strong>Online + LCD + DOOH + WiFi</strong> tạo touchpoint liên tục sáng/trưa/tối. DOOH phủ song song HN 1.5M + HCM 1.8M traffic. PR 37 bài + KOC 10 người tạo lớp credibility hỗ trợ conversion. Airport WiFi tiếp cận đúng EHNWO.</div><span class="ic-tag" style="background:var(--c6b);color:var(--c6)">✓ Integrated</span></div>
+    </div>
+    <div class="ins-sum">
+      <div class="is-title">Tổng kết &amp; Khuyến nghị</div>
+      <div class="is-grid">
+        <div>
+          <div class="is-col-lbl">Điểm mạnh chiến dịch</div>
+          <div class="is-item"><div class="is-dot" style="background:var(--g1)"></div><div class="is-text"><strong>Targeting chính xác</strong> — độ tuổi, giới tính, địa điểm và interests đồng nhất với ICP Lumière Series.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c2)"></div><div class="is-text"><strong>AdX Collection</strong> CTR 1.80% — kênh contextual hiệu quả nhất trong môi trường tài chính/BĐS.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c3)"></div><div class="is-text"><strong>Media Mix cân bằng</strong> giữa brand building và performance phù hợp đặc thù sản phẩm high-involvement.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c5)"></div><div class="is-text"><strong>Lead Quality vượt target</strong> — 104/100 QL, Conversion Rate 33.3%.</div></div>
+        </div>
+        <div>
+          <div class="is-col-lbl">Cơ hội tối ưu giai đoạn tiếp theo</div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c7)"></div><div class="is-text"><strong>Scale AdX + Facebook CPC</strong> — hai kênh CTR cao nhất, nên tăng ngân sách 20–30% trong campaign tiếp theo.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c8)"></div><div class="is-text"><strong>Retargeting 48.6M reach</strong> — pool lớn để remarketing trong giai đoạn mở bán, đặc biệt tệp đã xem iTVC.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c6)"></div><div class="is-text"><strong>Tăng Airport Lounge WiFi</strong> — hiện 2 điểm, quá ít so với tiềm năng tệp EHNWO du lịch quốc tế.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c4)"></div><div class="is-text"><strong>Bổ sung Hồ Tây, Phố cổ, Đê La Thành</strong> cho LCD/DOOH phase 2 — cover thêm khu vực cư trú target HN.</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main tab1 -->
+</div><!-- /tab0 -->
+
+<!-- ════════════════════════════════════
+     TAB 2 — DIGITAL ONLINE
+════════════════════════════════════ -->
+<div id="tab1" class="tab-pane">
+
+  <!-- Filter bar Tab 2 -->
+  <div class="fbar">
+    <span class="flbl">Thời gian</span>
+    <div class="sw"><select id="t2-time" onchange="t2Filter()">
+      <option value="all">Toàn chiến dịch</option>
+      <option value="m3">Tháng 3/2026</option>
+      <option value="m4">Tháng 4/2026</option>
+      <option value="m5">Tháng 5/2026</option>
+      <option value="w1">Tuần 1 (01–07/03)</option>
+      <option value="w2">Tuần 2 (08–14/03)</option>
+      <option value="w3">Tuần 3 (15–21/03)</option>
+      <option value="w4">Tuần 4 (22–28/03)</option>
+      <option value="w5">Tuần 5–6 (29/03–11/04)</option>
+      <option value="w6">Tuần 7–8 (12–25/04)</option>
+      <option value="w7">Cuối chiến dịch (26/04–07/05)</option>
+    </select></div>
+    <div class="fsep"></div>
+    <span class="flbl">Nền tảng</span>
+    <div class="sw"><select id="t2-platform" onchange="t2Filter()">
+      <option value="all">Tất cả nền tảng</option>
+      <option value="facebook">Facebook Ads</option>
+      <option value="tiktok">TikTok Ads</option>
+      <option value="youtube">Youtube Ads</option>
+      <option value="gdn">GDN</option>
+      <option value="adx">AdX Collection</option>
+      <option value="banner">CPD Banner</option>
+      <option value="vnexpress">VnExpress</option>
+      <option value="pr">PR</option>
+      <option value="koc">KOC</option>
+    </select></div>
+    <button class="fbtn" onclick="resetT2()">↺ Reset</button>
+    <span id="fstatus2"></span>
+  </div>
+
+  <div class="main">
+
+    <!-- BUDGET ONLINE -->
+    <div class="slbl"><div class="slbl-dot"></div>Ngân sách Digital Online</div>
+    <div class="cband fade" style="grid-template-columns:repeat(5,1fr)">
+      <div class="cc"><div class="cclbl">Tổng Online Budget</div><div class="ccval" style="color:var(--c3)">3,957,200,000</div><div class="ccsub">VNĐ · 10 hạng mục</div></div>
+      <div class="cc"><div class="cclbl">Facebook Ads</div><div class="ccval" style="color:var(--c2)">723,200,000</div><div class="ccsub">CPM + CPC + CPE</div></div>
+      <div class="cc"><div class="cclbl">Lead Ads + KOC</div><div class="ccval" style="color:var(--g1d)">750,000,000</div><div class="ccsub">QLL + KOC Booking</div></div>
+      <div class="cc"><div class="cclbl">Video (YT + TikTok)</div><div class="ccval" style="color:var(--c4)">399,000,000</div><div class="ccsub">Youtube + TikTok Ads</div></div>
+      <div class="cc"><div class="cclbl">Banner + AdX + GDN</div><div class="ccval" style="color:var(--c5)">708,000,000</div><div class="ccsub">Display + Search</div></div>
+    </div>
+
+    <!-- REACH / IMPRESSION / CLICK / VIEW với local filter -->
+    <div class="slbl"><div class="slbl-dot"></div>Audience Quality theo Digital — Online</div>
+
+    <div class="lf">
+      <span class="lf-lbl">Lọc biểu đồ</span>
+      <div class="lf-sw"><select id="t2-chart-time" onchange="t2ChartFilter()"><option value="all">Tất cả thời gian</option><option value="m3">Tháng 3</option><option value="m4">Tháng 4</option><option value="m5">Tháng 5</option><option value="w1">Tuần 1</option><option value="w2">Tuần 2</option><option value="w3">Tuần 3</option><option value="w4">Tuần 4</option><option value="w5">Tuần 5–6</option><option value="w6">Tuần 7–8</option><option value="w7">Cuối CD</option></select></div>
+      <div class="lf-sw"><select id="t2-chart-platform" onchange="t2ChartFilter()"><option value="all">Tất cả nền tảng</option><option value="facebook">Facebook CPM</option><option value="fbcpc">Facebook CPC</option><option value="tiktok">TikTok</option><option value="youtube">Youtube</option><option value="adx">AdX</option></select></div>
+    </div>
+
+    <div class="g2">
+      <div class="panel"><div class="ph"><span class="pt">Lượt tiếp cận (Reach) theo ngày</span><span class="pv">48,615,804</span></div><div class="leg"><div class="li"><div class="ll" style="background:var(--c2)"></div>FB CPM</div><div class="li"><div class="ll" style="background:var(--c4)"></div>FB CPC</div><div class="li"><div class="ll" style="background:var(--c3)"></div>TikTok</div><div class="li"><div class="ll" style="background:var(--c5)"></div>Youtube</div></div><canvas id="t2-reachChart" height="120"></canvas></div>
+      <div class="panel"><div class="ph"><span class="pt">Lượt hiển thị (Impression) theo ngày</span><span class="pv">~88.1M</span></div><div class="leg"><div class="li"><div class="ll" style="background:var(--c2)"></div>Facebook</div><div class="li"><div class="ll" style="background:var(--c3)"></div>TikTok</div><div class="li"><div class="ll" style="background:var(--c5)"></div>Youtube</div></div><canvas id="t2-impChart" height="120"></canvas></div>
+    </div>
+    <div class="g2" style="margin-top:12px">
+      <div class="panel"><div class="ph"><span class="pt">Lượt nhấp chuột (Clicks) theo ngày</span><span class="pv">579,524</span></div><div class="leg"><div class="li"><div class="ll" style="background:var(--c2)"></div>FB CPM</div><div class="li"><div class="ll" style="background:var(--c4)"></div>FB CPC</div><div class="li"><div class="ll" style="background:var(--g1)"></div>AdX</div></div><canvas id="t2-clickChart" height="120"></canvas></div>
+      <div class="panel"><div class="ph"><span class="pt">Lượt xem (View) theo ngày</span><span class="pv">11,179,470</span></div><div class="leg"><div class="li"><div class="ll" style="background:var(--c5)"></div>Youtube TrueView</div><div class="li"><div class="ll" style="background:var(--c3)"></div>PR Views</div></div><canvas id="t2-viewChart" height="120"></canvas></div>
+    </div>
+
+    <!-- LEAD with local filter -->
+    <div class="slbl"><div class="slbl-dot"></div>Lead Generation</div>
+    <div class="lf">
+      <span class="lf-lbl">Lọc biểu đồ</span>
+      <div class="lf-sw"><select id="t2-lead-time" onchange="t2LeadFilter()"><option value="all">Tất cả thời gian</option><option value="m3">Tháng 3</option><option value="m4">Tháng 4</option><option value="m5">Tháng 5</option></select></div>
+      <div class="lf-sw"><select id="t2-lead-src" onchange="t2LeadFilter()"><option value="all">Tất cả nguồn</option><option value="affiliate">Affiliate</option><option value="facebook">Facebook</option><option value="search">Search</option><option value="zalo">Zalo</option><option value="tiktok">TikTok</option><option value="adnetwork">Adnetwork</option></select></div>
+    </div>
+    <div class="g3">
+      <div class="panel">
+        <div class="ph"><span class="pt">Lead Funnel</span></div>
+        <div class="fr"><div><div class="frlbl">Raw Leads</div><div class="frsub">QLL · Lead Ads · 67 ngày</div></div><div><div class="frnum">300</div><div class="frnote">Budget 450M</div></div></div>
+        <div class="fr"><div><div class="frlbl">Qualified Leads</div><div class="frsub">Đã xác nhận</div></div><div><div class="frnum" style="color:var(--g1d)">104</div><div class="frnote">+4 vs kế hoạch</div></div></div>
+        <div class="fr"><div><div class="frlbl">Avg Conversion Rate</div><div class="frsub">28–38% / ngày</div></div><div><div class="frnum" style="color:var(--c3)">~33.3%</div></div></div>
+        <div class="fr"><div><div class="frlbl">Cost Per QL</div></div><div><div class="frnum" style="color:var(--c2);font-size:15px">4,326,923</div><div class="frnote">VNĐ / QL</div></div></div>
+      </div>
+      <div class="panel"><div class="ph"><span class="pt">Qualified Lead theo ngày</span></div><canvas id="t2-leadChart" height="130"></canvas></div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Source Lead breakdown</span></div>
+        <div id="t2-srcRows"></div>
+        <div style="margin-top:10px"><canvas id="t2-sourceChart" height="70"></canvas></div>
+      </div>
+    </div>
+
+    <!-- AUDIENCE ONLINE -->
+    <div class="slbl"><div class="slbl-dot"></div>Audience — Digital Online</div>
+    <div class="g3">
+      <div class="panel"><div class="ph"><span class="pt">Phân bổ giới tính</span></div>
+        <div style="display:flex;gap:14px;align-items:center;justify-content:center;padding:8px 0">
+          <canvas id="t2-gOnline" width="95" height="95"></canvas>
+          <div class="dlg"><div class="dli"><div class="dlidot" style="background:var(--c2)"></div><span class="dliname">Male</span><span class="dlival" style="color:var(--c2)">65%</span></div><div class="dli"><div class="dlidot" style="background:var(--c4)"></div><span class="dliname">Female</span><span class="dlival" style="color:var(--c4)">35%</span></div></div>
+        </div>
+      </div>
+      <div class="panel"><div class="ph"><span class="pt">Phân bổ độ tuổi — Online</span></div><div class="leg"><div class="li"><span style="width:10px;height:10px;background:rgba(27,78,216,.62);border-radius:2px;display:inline-block"></span>&nbsp;Male</div><div class="li"><span style="width:10px;height:10px;background:rgba(225,29,72,.52);border-radius:2px;display:inline-block"></span>&nbsp;Female</div></div><div id="t2-ageOnline"></div></div>
+      <div class="panel"><div class="ph"><span class="pt">Interests &amp; Profile — Online</span></div><div id="t2-bubbleOnline" class="bwrap"></div></div>
+    </div>
+
+    <!-- SOV + BUDGET + PERFORMANCE -->
+    <div class="slbl"><div class="slbl-dot"></div>SOV · Ngân sách · Hiệu suất</div>
+    <div class="g3">
+      <div class="panel">
+        <div class="ph"><span class="pt">SOV — Share of Voice</span></div>
+        <div style="display:flex;align-items:center;gap:16px;padding:6px 0">
+          <div class="sov-badge" style="width:72px;height:72px;font-size:20px">30%</div>
+          <div>
+            <div style="font-size:12px;color:var(--ink2);line-height:1.65">Tỉ lệ SOV 30% trên Premium Adnetwork <strong style="color:var(--ink)">ADMICRO</strong> và <strong style="color:var(--ink)">VnExpress</strong> — duy trì ổn định 67 ngày trong bối cảnh BĐS cạnh tranh cao.</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel"><div class="ph"><span class="pt">Tỷ lệ ngân sách hình thức mua</span></div><canvas id="t2-buyTypeChart" height="140"></canvas></div>
+      <div class="panel"><div class="ph"><span class="pt">Chi tiết ngân sách Online</span><span class="pv">3,957.2M</span></div><div id="t2-budgetRows"></div></div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="g2">
+        <div class="panel"><div class="ph"><span class="pt">Avg CTR (%) — So sánh hạng mục</span></div><canvas id="t2-ctrChart" height="150"></canvas></div>
+        <div class="panel"><div class="ph"><span class="pt">Avg CPM (VNĐ) — So sánh hạng mục</span></div><canvas id="t2-cpmChart" height="150"></canvas></div>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="panel"><div class="ph"><span class="pt">Hiệu suất tổng hợp — CPM · CPC · CTR</span></div>
+        <div style="display:grid;grid-template-columns:130px 1fr 75px 80px 65px;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--bdr);margin-bottom:3px"><span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500">Kênh</span><span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500">CTR</span><span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500;text-align:right">CPM</span><span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500;text-align:right">CPC</span><span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--ink3);font-weight:500;text-align:right">CTR</span></div>
+        <div id="t2-chanRows"></div>
+      </div>
+    </div>
+
+    <!-- INSIGHT TAB 2 -->
+    <div class="slbl"><div class="slbl-dot"></div>Insight Report — Digital Online</div>
+    <div class="ins-hdr">
+      <div class="ins-eye">Digital Online Performance Report</div>
+      <div class="ins-title">Hiệu suất kênh Digital Online vượt benchmark<br>với CTR và Lead Quality cao hơn trung bình ngành</div>
+      <div class="ins-sub">Phân tích 10 kênh Digital Online · Tổng ngân sách 3,957,200,000 VNĐ · 67 ngày</div>
+    </div>
+    <div class="ins-grid cols2" style="margin-bottom:12px">
+      <div class="ic c1"><div class="ic-ico">🏆</div><div class="ic-title">CTR Performance — AdX dẫn đầu</div><div class="ic-body"><strong>AdX Collection CTR 1.80%</strong> cao nhất toàn chiến dịch. Contextual targeting trong môi trường nội dung tài chính & BĐS tạo ra tỉ lệ click vượt trội. Facebook CPC (1.41%) và CPE (1.20%) cho thấy audience được target chính xác, engagement chất lượng. Youtube TrueView view rate 32–38% — hợp lý cho iTVC format dài.</div><span class="ic-tag" style="background:var(--g1b);color:var(--g1d)">↑ Above Benchmark</span></div>
+      <div class="ic c2"><div class="ic-ico">💰</div><div class="ic-title">Chi phí & Hiệu quả — CPM tối ưu</div><div class="ic-body">TikTok đạt <strong>CPM 8,000 VNĐ</strong> thấp nhất với reach 10.8M — hiệu quả chi phí cao nhất cho brand awareness. Facebook CPM 18,000 VNĐ với reach 11M cân bằng giữa chi phí và chất lượng audience. Facebook CPE 63,000 VNĐ cao nhưng tạo <strong>120,000 engagements</strong> chất lượng từ tệp đúng.</div><span class="ic-tag" style="background:var(--c2b);color:var(--c2)">✓ Cost Efficient</span></div>
+      <div class="ic c3"><div class="ic-ico">🎯</div><div class="ic-title">Lead Quality — Affiliate kênh dẫn đầu</div><div class="ic-body">Affiliate chiếm <strong>64% source leads</strong> (67/104 QL) — cho thấy network partner hoạt động hiệu quả trong phân khúc BĐS cao cấp. Conversion rate ổn định 28–38% mỗi ngày, không có spike bất thường. Facebook và Search đóng góp 19% còn lại — phù hợp với hành vi khách hàng tìm kiếm chủ động.</div><span class="ic-tag" style="background:var(--c3b);color:var(--c3)">✓ Quality Leads</span></div>
+      <div class="ic c4"><div class="ic-ico">📈</div><div class="ic-title">Tối ưu giai đoạn tiếp theo</div><div class="ic-body">Scale <strong>AdX Collection và Facebook CPC</strong> thêm 20–30% — hai kênh có CTR cao nhất và CPC hợp lý. Retargeting tệp <strong>48.6M reach đã tiếp cận</strong> trong giai đoạn mở bán. Xây dựng lookalike audience từ 104 QL để mở rộng tệp tương tự. Cân nhắc tăng GDN để cover thêm search intent.</div><span class="ic-tag" style="background:var(--c4b);color:var(--c4)">→ Next Phase</span></div>
+    </div>
+  </div><!-- /main tab2 -->
+</div><!-- /tab1 -->
+
+<!-- ════════════════════════════════════
+     TAB 3 — DIGITAL OFFLINE
+════════════════════════════════════ -->
+<div id="tab2" class="tab-pane">
+
+  <!-- Filter bar Tab 3 -->
+  <div class="fbar">
+    <span class="flbl">Thời gian</span>
+    <div class="sw"><select id="t3-time" onchange="t3Filter()">
+      <option value="all">Toàn chiến dịch</option>
+      <option value="m3">Tháng 3/2026</option>
+      <option value="m4">Tháng 4/2026</option>
+      <option value="m5">Tháng 5/2026</option>
+    </select></div>
+    <div class="fsep"></div>
+    <span class="flbl">Kênh</span>
+    <div class="sw"><select id="t3-channel" onchange="t3Filter()">
+      <option value="all">Tất cả kênh Offline</option>
+      <option value="lcd">Digital LCD Frame</option>
+      <option value="dooh">Digital OOH LED</option>
+      <option value="wifi">Wifi Marketing</option>
+    </select></div>
+    <div class="fsep"></div>
+    <span class="flbl">Khu vực</span>
+    <div class="sw"><select id="t3-region" onchange="t3Filter()">
+      <option value="all">Tất cả khu vực</option>
+      <option value="hn">Hà Nội</option>
+      <option value="hcm">TP. Hồ Chí Minh</option>
+    </select></div>
+    <button class="fbtn" onclick="resetT3()">↺ Reset</button>
+    <span id="fstatus3"></span>
+  </div>
+
+  <div class="main">
+
+    <!-- BUDGET OFFLINE -->
+    <div class="slbl"><div class="slbl-dot"></div>Ngân sách Digital Offline</div>
+    <div class="cband fade" style="grid-template-columns:1fr 1fr 1fr 1fr">
+      <div class="cc"><div class="cclbl">Tổng Offline Budget</div><div class="ccval" style="color:var(--c3)">1,650,000,000</div><div class="ccsub">VNĐ · 3 kênh</div></div>
+      <div class="cc"><div class="cclbl">Digital LCD Frame</div><div class="ccval" style="color:var(--c2)">900,000,000</div><div class="ccsub">54.5% offline budget</div></div>
+      <div class="cc"><div class="cclbl">Digital OOH LED</div><div class="ccval" style="color:var(--c5)">500,000,000</div><div class="ccsub">30.3% offline budget</div></div>
+      <div class="cc"><div class="cclbl">Wifi Marketing</div><div class="ccval" style="color:var(--g1d)">250,000,000</div><div class="ccsub">15.2% offline budget</div></div>
+    </div>
+
+    <!-- DP/LCD OVERVIEW (new section) -->
+    <div class="slbl"><div class="slbl-dot"></div>Tổng quan DP / LCD</div>
+    <div class="dp-grid">
+      <div class="dp-card" style="border-top:3px solid var(--g1)">
+        <div class="dp-lbl">Số thiết bị hoạt động hôm nay</div>
+        <div class="dp-val" style="color:var(--ink3)">0</div>
+        <div class="dp-sub">Campaign đã kết thúc 07/05/2026</div>
+      </div>
+      <div class="dp-card" style="border-top:3px solid var(--c2)">
+        <div class="dp-lbl">Device Week (tổng)</div>
+        <div class="dp-val" style="color:var(--c2)">70,320</div>
+        <div class="dp-sub">1 DW = 1 tuần / thiết bị</div>
+      </div>
+      <div class="dp-card" style="border-top:3px solid var(--c3)">
+        <div class="dp-lbl">Tổng số toà nhà</div>
+        <div class="dp-val" style="color:var(--c3)">2,290</div>
+        <div class="dp-sub">LCD Frame coverage</div>
+      </div>
+      <div class="dp-card" style="border-top:3px solid var(--c5)">
+        <div class="dp-lbl">Total LCD Screens</div>
+        <div class="dp-val" style="color:var(--c5)">450</div>
+        <div class="dp-sub">1,200 display points</div>
+      </div>
+    </div>
+
+    <!-- NFC SCAN RATE -->
+    <div class="panel fade" style="margin-bottom:14px">
+      <div class="ph"><span class="pt">Tỉ lệ quét NFC từ DP / LCD</span><span style="font-size:11px;color:var(--ink2)">Scan rate theo phân vùng địa lý</span></div>
+      <div class="nfc-grid">
+        <div class="nfc-item"><span class="nfc-ico">🏢</span><div><div class="nfc-region">Miền Bắc — Văn phòng</div><div style="font-size:10px;color:var(--ink3)">Office Building · Hà Nội</div></div><div class="nfc-val" style="color:var(--c2)">0.57%</div></div>
+        <div class="nfc-item"><span class="nfc-ico">🏠</span><div><div class="nfc-region">Miền Bắc — Chung cư</div><div style="font-size:10px;color:var(--ink3)">Apartment Building · Hà Nội</div></div><div class="nfc-val" style="color:var(--c6)">0.34%</div></div>
+        <div class="nfc-item"><span class="nfc-ico">🏢</span><div><div class="nfc-region">Miền Nam — Văn phòng</div><div style="font-size:10px;color:var(--ink3)">Office Building · TP.HCM</div></div><div class="nfc-val" style="color:var(--g1d)">0.69%</div></div>
+        <div class="nfc-item"><span class="nfc-ico">🏠</span><div><div class="nfc-region">Miền Nam — Chung cư</div><div style="font-size:10px;color:var(--ink3)">Apartment Building · TP.HCM</div></div><div class="nfc-val" style="color:var(--c3)">1.15%</div></div>
+      </div>
+      <div style="margin-top:12px"><canvas id="t3-nfcChart" height="60"></canvas></div>
+    </div>
+
+    <!-- TRAFFIC CHARTS with local filter -->
+    <div class="slbl"><div class="slbl-dot"></div>Lưu lượng &amp; Tiếp cận — Digital Offline</div>
+    <div class="lf">
+      <span class="lf-lbl">Lọc biểu đồ</span>
+      <div class="lf-sw"><select id="t3-chart-time" onchange="t3ChartFilter()"><option value="all">Tất cả thời gian</option><option value="m3">Tháng 3</option><option value="m4">Tháng 4</option><option value="m5">Tháng 5</option></select></div>
+      <div class="lf-sw"><select id="t3-chart-ch" onchange="t3ChartFilter()"><option value="all">Tất cả kênh</option><option value="lcd">LCD Frame</option><option value="dooh">DOOH</option><option value="wifi">WiFi</option></select></div>
+    </div>
+    <div class="g2">
+      <div class="panel"><div class="ph"><span class="pt">Lưu lượng (Traffic) theo ngày</span><span class="pv">6,134,554</span></div><div class="leg"><div class="li"><div class="ll" style="background:var(--c3)"></div>LCD Frame</div><div class="li"><div class="ll" style="background:var(--c2)"></div>DOOH</div><div class="li"><div class="ll" style="background:var(--c5)"></div>WiFi</div></div><canvas id="t3-trafficChart" height="120"></canvas></div>
+      <div class="panel"><div class="ph"><span class="pt">Lượt tiếp cận &amp; Hiển thị — WiFi Mkt</span><span class="pv">35,206 Reach</span></div><div class="leg"><div class="li"><div class="ll" style="background:var(--c5)"></div>Impression</div><div class="li"><div class="ll" style="background:var(--g1)"></div>Reach</div></div><canvas id="t3-wifiChart" height="120"></canvas></div>
+    </div>
+
+    <!-- REGION TRAFFIC with local filter -->
+    <div class="slbl"><div class="slbl-dot"></div>Traffic theo địa phương &amp; Vị trí</div>
+    <div class="lf">
+      <span class="lf-lbl">Lọc biểu đồ</span>
+      <div class="lf-sw"><select id="t3-reg-time" onchange="t3RegFilter()"><option value="all">Tất cả thời gian</option><option value="m3">Tháng 3</option><option value="m4">Tháng 4</option><option value="m5">Tháng 5</option></select></div>
+    </div>
+    <div class="g3">
+      <div class="panel">
+        <div class="ph"><span class="pt">Traffic phân bổ theo địa phương</span><span class="pv">6,134,554</span></div>
+        <div id="t3-regRows"></div>
+        <div style="margin-top:12px"><canvas id="t3-regionChart" height="80"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Traffic theo kênh Offline</span></div>
+        <div class="fr"><div><div class="frlbl">Digital OOH LED</div><div class="frsub">HN 1,504,053 + HCM 1,838,286</div></div><div><div class="frnum" style="color:var(--c2)">3,342,339</div><div class="frnote">54.5%</div></div></div>
+        <div class="fr"><div><div class="frlbl">Digital LCD Frame</div><div class="frsub">450 LCD · 1,200 màn hình</div></div><div><div class="frnum" style="color:var(--c3)">1,577,877</div><div class="frnote">25.7%</div></div></div>
+        <div class="fr"><div><div class="frlbl">Wifi Marketing</div><div class="frsub">20 địa điểm</div></div><div><div class="frnum" style="color:var(--c5)">1,214,338</div><div class="frnote">19.8%</div></div></div>
+        <div style="margin-top:12px"><canvas id="t3-offDonut" width="100" height="100" style="display:block;margin:0 auto"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Vị trí LCD Frame</span></div>
+        <div id="t3-locRows"></div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;font-weight:500">WiFi Locations (20 điểm)</div>
+          <div class="locr"><span class="locico">☕</span><span class="locname">Cafe Shop</span><div class="locbar"><div class="locfill" style="width:100%;background:var(--c3)"></div></div><span class="locval">15</span></div>
+          <div class="locr"><span class="locico">🌳</span><span class="locname">Community Area</span><div class="locbar"><div class="locfill" style="width:20%;background:var(--c2)"></div></div><span class="locval">3</span></div>
+          <div class="locr"><span class="locico">✈️</span><span class="locname">Airport Lounge</span><div class="locbar"><div class="locfill" style="width:13%;background:var(--c5)"></div></div><span class="locval">2</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDIENCE OFFLINE -->
+    <div class="slbl"><div class="slbl-dot"></div>Audience — Digital Offline</div>
+    <div class="g3">
+      <div class="panel"><div class="ph"><span class="pt">Phân bổ giới tính — Offline</span></div>
+        <div style="display:flex;gap:14px;align-items:center;justify-content:center;padding:8px 0">
+          <canvas id="t3-gOffline" width="95" height="95"></canvas>
+          <div class="dlg"><div class="dli"><div class="dlidot" style="background:var(--c2)"></div><span class="dliname">Nam</span><span class="dlival" style="color:var(--c2)">68%</span></div><div class="dli"><div class="dlidot" style="background:var(--c4)"></div><span class="dliname">Nữ</span><span class="dlival" style="color:var(--c4)">32%</span></div><div style="font-size:10px;color:var(--ink3);margin-top:4px;font-family:var(--mono)">Core: 30–45 tuổi</div></div>
+        </div>
+      </div>
+      <div class="panel"><div class="ph"><span class="pt">Phân bổ độ tuổi — Offline</span></div><div class="leg"><div class="li"><span style="width:10px;height:10px;background:rgba(27,78,216,.62);border-radius:2px;display:inline-block"></span>&nbsp;Nam 68%</div><div class="li"><span style="width:10px;height:10px;background:rgba(225,29,72,.52);border-radius:2px;display:inline-block"></span>&nbsp;Nữ 32%</div></div><div id="t3-ageOffline"></div></div>
+      <div class="panel"><div class="ph"><span class="pt">Interests &amp; Profile — Offline</span></div><div id="t3-bubbleOffline" class="bwrap"></div></div>
+    </div>
+
+    <!-- INSIGHT TAB 3 -->
+    <div class="slbl"><div class="slbl-dot"></div>Insight Report — Digital Offline</div>
+    <div class="ins-hdr">
+      <div class="ins-eye">Digital Offline Intelligence Report</div>
+      <div class="ins-title">LCD · DOOH · WiFi — Tiếp cận đúng tệp cao cấp<br>tại đúng môi trường sống và làm việc</div>
+      <div class="ins-sub">Phân tích 3 kênh Digital Offline · Tổng ngân sách 1,650,000,000 VNĐ · 6,134,554 traffic</div>
+    </div>
+    <div class="ins-grid cols3" style="margin-bottom:12px">
+      <div class="ic c1"><div class="ic-ico">🏢</div><div class="ic-title">Placement Intelligence — Office First</div><div class="ic-body">Office Building chiếm <strong>645 vị trí</strong> — cao nhất trong LCD placement, tiếp cận trực tiếp chuyên gia tài chính, lãnh đạo SME trong giờ làm việc. Apartment Building (438) bổ sung touchpoint tại môi trường sống. Tổng 2,290 toà nhà phủ sóng toàn diện phân khúc cao cấp tại HN và HCM.</div><span class="ic-tag" style="background:var(--g1b);color:var(--g1d)">✓ Right Placement</span></div>
+      <div class="ic c2"><div class="ic-ico">📍</div><div class="ic-title">NFC Scan — HCM vượt trội</div><div class="ic-body">Miền Nam Chung cư đạt <strong>NFC scan rate 1.15%</strong> — cao nhất toàn hệ thống, cho thấy mức độ tương tác chủ động của cư dân căn hộ cao cấp tại HCM. Văn phòng Miền Nam 0.69% cũng cao hơn Miền Bắc (0.57%), phản ánh tệp TP.HCM chủ động tìm hiểu BĐS hơn.</div><span class="ic-tag" style="background:var(--c2b);color:var(--c2)">↑ HCM Outperforms</span></div>
+      <div class="ic c3"><div class="ic-ico">✈️</div><div class="ic-title">Airport WiFi — EHNWO Touchpoint</div><div class="ic-body">WiFi Marketing 20 điểm tập trung tại <strong>Cafe Shop (15)</strong> và <strong>Airport Lounge (2)</strong> — tiếp cận đúng tệp EHNWOs thường xuyên di chuyển quốc tế, du lịch hạng sang, sử dụng Airport Lounge. Đây là điểm chạm có độ chính xác targeting cao nhất cho tệp nhà đầu tư toàn cầu.</div><span class="ic-tag" style="background:var(--c3b);color:var(--c3)">✓ Premium Touchpoint</span></div>
+    </div>
+    <div class="ins-sum">
+      <div class="is-title">Nhận định &amp; Khuyến nghị Offline</div>
+      <div class="is-grid">
+        <div>
+          <div class="is-col-lbl">Điểm mạnh Offline</div>
+          <div class="is-item"><div class="is-dot" style="background:var(--g1)"></div><div class="is-text"><strong>Phủ sóng HN + HCM song song</strong> — DOOH tạo 3.3M traffic tổng, đảm bảo brand visibility ở cả 2 thị trường lớn nhất.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c2)"></div><div class="is-text"><strong>NFC engagement tích cực</strong> — HCM scan rate 0.69–1.15% cho thấy audience chủ động tương tác với content trên LCD.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c3)"></div><div class="is-text"><strong>Location Mix chính xác</strong> — Office + Apartment + Cafe + Airport cover đủ 4 touchpoint trong ngày của target.</div></div>
+        </div>
+        <div>
+          <div class="is-col-lbl">Cơ hội tối ưu</div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c7)"></div><div class="is-text"><strong>Tăng Airport Lounge lên 5–7 điểm</strong> — hiện 2 điểm quá ít so với lưu lượng khách hàng tiềm năng tại các cảng HAN và SGN.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c8)"></div><div class="is-text"><strong>Mở rộng LCD tại Hồ Tây, Phố cổ, Đê La Thành</strong> (HN) và Thảo Điền, Phú Mỹ Hưng (HCM) — khu vực cư trú target chưa được cover.</div></div>
+          <div class="is-item"><div class="is-dot" style="background:var(--c4)"></div><div class="is-text"><strong>WiFi marketing tại Golf Club</strong> — interests data cho thấy Golf là top interest của tệp offline, cần bổ sung vào WiFi placement.</div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /main tab3 -->
+</div><!-- /tab2 -->
+
+<footer>admeX Creative Media Agency &nbsp;·&nbsp; Campaign Dashboard Report &nbsp;·&nbsp; [Campaign] / [Brand] &nbsp;·&nbsp; 01/03–07/05/2026 &nbsp;·&nbsp; Confidential</footer>
+
+<script>
+const P={g1:'#46d360',g1d:'#28a845',g1b:'rgba(70,211,96,.12)',c2:'#1b4ed8',c2b:'rgba(27,78,216,.12)',c3:'#d97706',c3b:'rgba(217,119,6,.12)',c4:'#e11d48',c4b:'rgba(225,29,72,.12)',c5:'#0d9488',c5b:'rgba(13,148,136,.12)',c6:'#7c3aed',c6b:'rgba(124,58,237,.12)',c7:'#ea580c',c7b:'rgba(234,88,12,.12)',c8:'#db2777',c8b:'rgba(219,39,119,.12)',c9:'#475569',c9b:'rgba(71,85,105,.12)'};
+Chart.defaults.font.family="'Plus Jakarta Sans',Arial,sans-serif";Chart.defaults.font.size=10;Chart.defaults.color='rgba(15,26,17,.42)';
+const TT={backgroundColor:'rgba(255,255,255,.97)',titleColor:'#0f1a11',bodyColor:'rgba(15,26,17,.65)',borderColor:'rgba(0,0,0,.09)',borderWidth:1,padding:9,titleFont:{weight:'700',family:"'Plus Jakarta Sans',Arial,sans-serif",size:11},bodyFont:{family:"'JetBrains Mono',monospace",size:11}};
+
+// ── DATA ──
+function bell(n,peak,noise=.04){return Array.from({length:n},(_,i)=>{const t=i/(n-1),v=Math.sin(t*Math.PI)*.85+.15+(Math.random()-.5)*noise;return Math.max(0,v*peak);});}
+function sm(a,w=3){return a.map((v,i)=>{const s=Math.max(0,i-w),e=Math.min(a.length-1,i+w),sl=a.slice(s,e+1);return sl.reduce((x,y)=>x+y,0)/sl.length;});}
+function days(){const L=[],s=new Date(2026,2,1);for(let i=0;i<67;i++){const d=new Date(s);d.setDate(d.getDate()+i);L.push(`${d.getDate()}/${d.getMonth()+1}`);}return L;}
+const DL=days();
+// Online data
+const fbR=sm(bell(67,200217)),fbcR=sm(bell(67,41607)),tkR=sm(bell(67,196577)),ytR=sm(bell(67,123771));
+const fbI=sm(bell(67,364031)),tkI=sm(bell(67,327629)),ytI=sm(bell(67,176817));
+const fbC=sm(bell(67,4004)),fbcC=sm(bell(67,1165)),axC=sm(bell(67,910));
+const ytV=sm(bell(67,61886)),prV=Array.from({length:67},(_,i)=>i<37?15000+Math.random()*14000:0);
+const qlD=[0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,3,4,2,4,3,3,3,2,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0];
+// Offline data
+const lcdT=sm(bell(47,43000)),doohT=sm(bell(47,83214)),wifiT=sm(bell(47,41314));
+const wifiI=sm(bell(47,43000)),wifiRch=Array.from({length:47},_=>700+Math.random()*200);
+const hnT=sm(bell(47,37446)),hcmT=sm(bell(47,45768));
+
+// Range helpers
+const periodMap={w1:[0,6],w2:[7,13],w3:[14,20],w4:[21,27],w5:[28,41],w6:[42,55],w7:[56,66]};
+const monthMap={m3:[0,30],m4:[31,60],m5:[61,66]};
+function getRange(tv){if(tv==='all')return[0,66];if(periodMap[tv])return periodMap[tv];if(monthMap[tv])return monthMap[tv];return[0,66];}
+function getRange3(tv){if(tv==='all')return[0,46];if(tv==='m3')return[0,30];if(tv==='m4')return[0,46];if(tv==='m5')return[30,46];return[0,46];}
+
+function ds(label,data,color,bg){return{label,data,borderColor:color,backgroundColor:bg,fill:true};}
+const lOpt=(labels,datasets)=>({type:'line',data:{labels,datasets},options:{responsive:true,animation:{duration:700},plugins:{legend:{display:false},tooltip:{...TT,mode:'index',intersect:false}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8,maxRotation:0}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{maxTicksLimit:5,callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v}}},elements:{point:{radius:0,hoverRadius:4},line:{borderWidth:1.8,tension:.35,fill:true}}}});
+
+// ── CHARTS ──
+const charts={};
+function mkChart(id,cfg){const cv=document.getElementById(id);if(!cv)return;if(charts[id])charts[id].destroy();charts[id]=new Chart(cv,cfg);}
+
+function initOnlineCharts(s=0,e=66){
+  const lbl=DL.slice(s,e+1);
+  mkChart('t2-reachChart',lOpt(lbl,[ds('FB CPM',fbR.slice(s,e+1),P.c2,P.c2b),ds('FB CPC',fbcR.slice(s,e+1),P.c4,P.c4b),ds('TikTok',tkR.slice(s,e+1),P.c3,P.c3b),ds('Youtube',ytR.slice(s,e+1),P.c5,P.c5b)]));
+  mkChart('t2-impChart',lOpt(lbl,[ds('Facebook',fbI.slice(s,e+1),P.c2,P.c2b),ds('TikTok',tkI.slice(s,e+1),P.c3,P.c3b),ds('Youtube',ytI.slice(s,e+1),P.c5,P.c5b)]));
+  mkChart('t2-clickChart',lOpt(lbl,[ds('FB CPM',fbC.slice(s,e+1),P.c2,P.c2b),ds('FB CPC',fbcC.slice(s,e+1),P.c4,P.c4b),ds('AdX',axC.slice(s,e+1),P.g1,P.g1b)]));
+  mkChart('t2-viewChart',lOpt(lbl,[ds('Youtube TrueView',ytV.slice(s,e+1),P.c5,P.c5b),ds('PR Views',prV.slice(s,e+1),P.c3,P.c3b)]));
+  mkChart('t2-leadChart',{type:'bar',data:{labels:lbl,datasets:[{label:'QL',data:qlD.slice(s,e+1),backgroundColor:qlD.slice(s,e+1).map(v=>v>=3?P.g1:v>=2?'rgba(70,211,96,.55)':'rgba(70,211,96,.3)'),borderRadius:3,borderSkipped:false}]},options:{responsive:true,animation:{duration:700},plugins:{legend:{display:false},tooltip:{...TT}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8,maxRotation:0}},y:{grid:{color:'rgba(0,0,0,.04)'},max:5,ticks:{stepSize:1}}}}});
+}
+
+function initOfflineCharts(s=0,e=46){
+  const DL3=Array.from({length:47},(_,i)=>{const d=new Date(2026,2,1);d.setDate(d.getDate()+i);return`${d.getDate()}/${d.getMonth()+1}`;});
+  const lbl=DL3.slice(s,e+1);
+  mkChart('t3-trafficChart',lOpt(lbl,[ds('LCD Frame',lcdT.slice(s,e+1),P.c3,P.c3b),ds('DOOH',doohT.slice(s,e+1),P.c2,P.c2b),ds('WiFi',wifiT.slice(s,e+1),P.c5,P.c5b)]));
+  mkChart('t3-wifiChart',lOpt(lbl,[ds('Impression',wifiI.slice(s,e+1),P.c5,P.c5b),ds('Reach',wifiRch.slice(s,e+1),P.g1,P.g1b)]));
+  mkChart('t3-regionChart',lOpt(lbl,[ds('Hà Nội',hnT.slice(s,e+1),P.c2,P.c2b),ds('TP.HCM',hcmT.slice(s,e+1),P.c4,P.c4b)]));
+}
+
+function initStaticCharts(){
+  // CTR
+  const ctrLabels=['AdX','FB CPC','FB CPE','FB CPM','TikTok','GDN','VnEx','CPD PC','CPD MB'];
+  const ctrColors=[P.g1,P.c2,P.c5,P.c6,P.c3,P.c4,P.c9,'#94a3b8','#cbd5e1'];
+  const barH_opts=(labels,data,colors,cb)=>({type:'bar',data:{labels,datasets:[{label:'',data,backgroundColor:colors,borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:cb}}},scales:{x:{grid:{color:'rgba(0,0,0,.04)'}},y:{grid:{display:false}}}}});
+  mkChart('t1-ctrChart',barH_opts(ctrLabels,[1.80,1.41,1.20,1.11,0.79,0.60,0.15,0.12,0.09],ctrColors,c=>` ${c.raw}%`));
+  mkChart('t2-ctrChart',barH_opts(ctrLabels,[1.80,1.41,1.20,1.11,0.79,0.60,0.15,0.12,0.09],ctrColors,c=>` ${c.raw}%`));
+  // CPM
+  const cpmLabels=['FB CPE','FB CPC','CPD PC','GDN','FB CPM','CPD MB','TikTok'];
+  mkChart('t1-cpmChart',barH_opts(cpmLabels,[63000,32200,12000,14400,18000,10000,8000],[P.c4,P.c2,P.c3,P.c5,P.c6,P.c7,P.c8],c=>` ${c.raw.toLocaleString('vi')} VNĐ`));
+  mkChart('t2-cpmChart',barH_opts(cpmLabels,[63000,32200,12000,14400,18000,10000,8000],[P.c4,P.c2,P.c3,P.c5,P.c6,P.c7,P.c8],c=>` ${c.raw.toLocaleString('vi')} VNĐ`));
+  // Buy type
+  const buyD={labels:['O-Display','Sản xuất','Booking','CPM','QLL','CPC','CPV','CPD','CPE'],data:[29.4,16.5,13.4,9.0,8.0,9.5,4.5,5.8,3.9],colors:[P.c3,P.c6,P.c4,P.c2,P.g1,P.c5,P.c7,P.c8,P.c9]};
+  const dOpt=(id)=>mkChart(id,{type:'doughnut',data:{labels:buyD.labels,datasets:[{data:buyD.data,backgroundColor:buyD.colors,borderWidth:2,borderColor:'#fff',hoverOffset:5}]},options:{cutout:'58%',responsive:true,plugins:{legend:{position:'right',labels:{boxWidth:8,font:{size:10},padding:7}},tooltip:{...TT,callbacks:{label:c=>` ${c.label}: ${c.raw}%`}}}}});
+  dOpt('t1-buyTypeChart');dOpt('t2-buyTypeChart');
+  // Source bar
+  mkChart('t2-sourceChart',{type:'bar',data:{labels:['Affiliate','Facebook','Adnetwork','Search','Zalo','TikTok'],datasets:[{data:[67,12,8,8,5,4],backgroundColor:[P.c3,P.c2,P.g1,P.c4,P.c5,P.c7],borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{...TT}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,.04)'},max:80}}}});
+  // NFC bar
+  mkChart('t3-nfcChart',{type:'bar',data:{labels:['MB Văn phòng','MB Chung cư','MN Văn phòng','MN Chung cư'],datasets:[{data:[0.57,0.34,0.69,1.15],backgroundColor:[P.c2,P.c6,P.g1d,P.c3],borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>` ${c.raw}%`}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:v=>v+'%'},max:1.4}}}});
+  // Offline donut
+  mkChart('t3-offDonut',{type:'doughnut',data:{labels:['DOOH','LCD Frame','WiFi'],datasets:[{data:[54.5,25.7,19.8],backgroundColor:[P.c2,P.c3,P.c5],borderWidth:2,borderColor:'#fff'}]},options:{cutout:'60%',responsive:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:10},padding:7}},tooltip:{...TT,callbacks:{label:c=>` ${c.label}: ${c.raw}%`}}}}});
+}
+
+// ── DONUTS ──
+function drawDonut(id,data,colors,txt){
+  const cv=document.getElementById(id);if(!cv)return;
+  const ctx=cv.getContext('2d'),cx=50,cy=50,r=42,inn=27;
+  let ang=-Math.PI/2;
+  data.forEach((p,i)=>{const end=ang+p/100*2*Math.PI;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,end);ctx.closePath();ctx.fillStyle=colors[i];ctx.fill();ang=end;});
+  ctx.beginPath();ctx.arc(cx,cy,inn,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
+  ctx.fillStyle='rgba(15,26,17,.5)';ctx.font='bold 8px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(txt,cx,cy);
+}
+
+// ── AGE ROWS ──
+function buildAge(elId,rows,maxW=200){
+  const el=document.getElementById(elId);if(!el)return;el.innerHTML='';
+  rows.forEach(d=>{
+    const div=document.createElement('div');div.className='ar';
+    div.innerHTML=`<span class="arlbl">${d.lbl}</span><div class="arbars"><div class="abm" style="width:${d.m/d.max*maxW}px"><span class="abpct">${d.m}%</span></div><div class="abf" style="width:${d.f/d.max*maxW}px"><span class="abpct">${d.f}%</span></div></div>`;
+    el.appendChild(div);
+  });
+}
+const ageOnlineData=[{lbl:'18–24',m:5.6,f:3.0,max:29},{lbl:'25–34',m:14.8,f:8.0,max:29},{lbl:'35–45',m:27.3,f:14.7,max:29},{lbl:'46–55',m:13.2,f:7.1,max:29},{lbl:'>55',m:4.1,f:2.2,max:29}];
+const ageOfflineData=[{lbl:'18–29',m:6.5,f:3.1,max:31},{lbl:'30–45',m:29.1,f:13.7,max:31},{lbl:'46–55',m:20.4,f:9.6,max:31},{lbl:'>55',m:12.0,f:5.6,max:31}];
+['t1-ageOnline','t2-ageOnline'].forEach(id=>buildAge(id,ageOnlineData));
+['t1-ageOffline','t3-ageOffline'].forEach(id=>buildAge(id,ageOfflineData));
+
+// ── BUBBLES ──
+const intOnline=[{name:'Wealth Management',w:8,c:P.c6,bg:P.c6b},{name:'BĐS cao cấp',w:7,c:P.c3,bg:P.c3b},{name:'Chứng khoán',w:7,c:P.g1d,bg:P.g1b},{name:'Quỹ đầu tư',w:6,c:P.c7,bg:P.c7b},{name:'Trường quốc tế',w:5,c:P.c8,bg:P.c8b},{name:'Du lịch QT',w:4,c:P.c5,bg:P.c5b},{name:'Private Banking',w:4,c:P.c2,bg:P.c2b},{name:'Luxury Lifestyle',w:3,c:P.c4,bg:P.c4b},{name:'Golf',w:2,c:P.g1,bg:P.g1b},{name:'Longevity',w:2,c:P.c5,bg:P.c5b},{name:'Airport Lounge',w:1,c:P.c9,bg:P.c9b}];
+const intOffline=[{name:'BĐS cao cấp',w:8,c:P.c3,bg:P.c3b},{name:'Luxury Lifestyle',w:7,c:P.c4,bg:P.c4b},{name:'Private Banking',w:7,c:P.c2,bg:P.c2b},{name:'Du lịch QT',w:6,c:P.c5,bg:P.c5b},{name:'Golf',w:6,c:P.g1,bg:P.g1b},{name:'Airport Lounge',w:5,c:P.c9,bg:P.c9b},{name:'Wealth Management',w:4,c:P.c6,bg:P.c6b},{name:'Chứng khoán',w:3,c:P.g1d,bg:P.g1b},{name:'Quỹ đầu tư',w:3,c:P.c7,bg:P.c7b},{name:'Trường quốc tế',w:2,c:P.c8,bg:P.c8b},{name:'Longevity',w:2,c:P.c5,bg:P.c5b}];
+function buildBubbles(elId,interests){const el=document.getElementById(elId);if(!el)return;el.innerHTML='';interests.forEach(d=>{const span=document.createElement('span');span.className='bubble';const sz=9+d.w*1.8;span.style.cssText=`font-size:${sz}px;padding:${3+d.w*.7}px ${7+d.w*1.1}px;color:${d.c};background:${d.bg};border-color:${d.c}44`;span.textContent=d.name;el.appendChild(span);});}
+['t1-bubbleOnline','t2-bubbleOnline'].forEach(id=>buildBubbles(id,intOnline));
+['t1-bubbleOffline','t3-bubbleOffline'].forEach(id=>buildBubbles(id,intOffline));
+
+// ── BUDGET ROWS ──
+const budgets=[{cat:'Digital LCD Frame',amt:900000000,pct:16.1},{cat:'Sản xuất iTVC',amt:600000000,pct:10.7},{cat:'PR (Booking+Prod)',amt:585000000,pct:10.4},{cat:'Digital OOH LED',amt:500000000,pct:8.9},{cat:'Lead Ads (QLL)',amt:450000000,pct:8.0},{cat:'Facebook Ads (3)',amt:723200000,pct:12.9},{cat:'AdX Collection',amt:300000000,pct:5.4},{cat:'KOC Booking',amt:300000000,pct:5.4},{cat:'Youtube TrueView',amt:255000000,pct:4.5},{cat:'Wifi Marketing',amt:250000000,pct:4.5}];
+const budgetsOnline=[{cat:'Facebook Ads (3)',amt:723200000,pct:18.3},{cat:'Lead Ads (QLL)',amt:450000000,pct:11.4},{cat:'KOC Booking',amt:300000000,pct:7.6},{cat:'AdX Collection',amt:300000000,pct:7.6},{cat:'PR (Booking+Prod)',amt:585000000,pct:14.8},{cat:'Social Production',amt:192000000,pct:4.9},{cat:'Youtube TrueView',amt:255000000,pct:6.4},{cat:'TikTok Ads',amt:144000000,pct:3.6},{cat:'Banner CPD',amt:324000000,pct:8.2},{cat:'GDN + VnEx',amt:228000000,pct:5.8}];
+function buildBudget(elId,rows,maxPct){const el=document.getElementById(elId);if(!el)return;el.innerHTML='';rows.forEach(d=>{el.innerHTML+=`<div class="brow"><span class="bcat">${d.cat}</span><span class="bval">${(d.amt/1e6).toFixed(0)}M</span><div><div class="bpct">${d.pct}%</div><div class="mbt2"><div class="mbt2f" style="width:${d.pct/maxPct*100}%"></div></div></div></div>`;});}
+buildBudget('t1-budget-rows',budgets,16.1);
+buildBudget('t2-budgetRows',budgetsOnline,18.3);
+
+// ── CHANNEL TABLE ──
+const chans=[{name:'AdX Collection',cpm:null,cpc:6000,ctr:1.80,c:P.g1},{name:'Facebook CPC',cpm:32200,cpc:2300,ctr:1.41,c:P.c2},{name:'Facebook CPE',cpm:63000,cpc:5255,ctr:1.20,c:P.c5},{name:'Facebook CPM',cpm:18000,cpc:1637,ctr:1.11,c:P.c6},{name:'TikTok Ads',cpm:8000,cpc:1000,ctr:0.79,c:P.c3},{name:'GDN Ads',cpm:14400,cpc:2400,ctr:0.60,c:P.c4},{name:'VnExpress U-BG',cpm:null,cpc:null,ctr:0.15,c:P.c9},{name:'CPD Center PC',cpm:12000,cpc:10010,ctr:0.12,c:'#94a3b8'},{name:'CPD Article MB',cpm:10000,cpc:11118,ctr:0.09,c:'#cbd5e1'}];
+function buildChans(elId){const el=document.getElementById(elId);if(!el)return;el.innerHTML='';chans.forEach(d=>{el.innerHTML+=`<div class="mr"><span class="mname">${d.name}</span><div class="mbt"><div class="mbf" style="width:${d.ctr/1.80*100}%;background:${d.c}"></div></div><span class="mv">${d.cpm?(d.cpm/1000).toFixed(0)+'K':'—'}</span><span class="mv ${d.ctr>1?'hi':''}">${d.cpc?(d.cpc/1000).toFixed(1)+'K':'—'}</span><span class="mv hi">${d.ctr.toFixed(2)}%</span></div>`;});}
+buildChans('t1-chanRows');buildChans('t2-chanRows');
+
+// ── SOURCE ROWS ──
+const srcs=[{name:'Affiliate',val:67,c:P.c3},{name:'Facebook',val:12,c:P.c2},{name:'Adnetwork',val:8,c:P.g1},{name:'Search',val:8,c:P.c4},{name:'Zalo',val:5,c:P.c5},{name:'TikTok',val:4,c:P.c7}];
+function buildSrc(elId){const el=document.getElementById(elId);if(!el)return;el.innerHTML='';srcs.forEach(d=>{el.innerHTML+=`<div class="srcr"><span class="srcname">${d.name}</span><div class="srcbar"><div class="srcfill" style="width:${d.val/67*100}%;background:${d.c}"></div></div><span class="srcnum" style="color:${d.c}">${d.val}</span></div>`;});}
+buildSrc('t2-srcRows');
+
+// ── LOCATION ROWS ──
+const locs=[{ico:'🏢',name:'Office Building',val:645,c:P.c2},{ico:'🏠',name:'Apartment Bldg',val:438,c:P.c3},{ico:'🛍️',name:'Shopping Mall',val:54,c:P.c4},{ico:'🏪',name:'Commercial Cmplx',val:23,c:P.c5},{ico:'🏨',name:'Hotel',val:10,c:P.g1},{ico:'🍽️',name:'Restaurant',val:4,c:P.c6}];
+const lEl=document.getElementById('t3-locRows');if(lEl){locs.forEach(d=>{lEl.innerHTML+=`<div class="locr"><span class="locico">${d.ico}</span><span class="locname">${d.name}</span><div class="locbar"><div class="locfill" style="width:${d.val/645*100}%;background:${d.c}"></div></div><span class="locval">${d.val}</span></div>`;});}
+
+// ── REGION ROWS ──
+const regs=[{name:'TP. Hồ Chí Minh',val:1838286,c:P.c4},{name:'Hà Nội',val:1504053,c:P.c2},{name:'LCD Frame',val:1577877,c:P.c3},{name:'WiFi Marketing',val:1214338,c:P.c5}];
+const rEl=document.getElementById('t3-regRows');if(rEl){regs.forEach(d=>{rEl.innerHTML+=`<div class="regr"><span class="regname">${d.name}</span><div class="regbar"><div class="regfill" style="width:${d.val/1838286*100}%;background:${d.c}"></div></div><span class="regval">${d.val.toLocaleString('vi')}</span></div>`;});}
+
+// ── INIT ALL ──
+function initAll(){
+  drawDonut('t1-gOnline',[65,35],[P.c2,P.c4],'65/35');
+  drawDonut('t1-gOffline',[68,32],[P.c2,P.c4],'68/32');
+  drawDonut('t2-gOnline',[65,35],[P.c2,P.c4],'65/35');
+  drawDonut('t3-gOffline',[68,32],[P.c2,P.c4],'68/32');
+  initStaticCharts();
+  initOnlineCharts();
+  initOfflineCharts();
+}
+
+// ── TAB SWITCH ──
+function switchTab(idx,btn){
+  document.querySelectorAll('.tab-pane').forEach((p,i)=>{p.classList.toggle('active',i===idx);});
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // Redraw charts when tab becomes visible
+  setTimeout(()=>{Object.values(charts).forEach(c=>{try{c.resize();}catch(e){}});},50);
+}
+
+// ── FILTER LOGIC ──
+function t1Filter(){
+  const tv=document.getElementById('t1-time').value;
+  document.getElementById('fstatus1').textContent=tv!=='all'?'1 filter active':'';
+}
+function resetT1(){document.getElementById('t1-time').value='all';document.getElementById('fstatus1').textContent='';}
+
+function t2Filter(){
+  const tv=document.getElementById('t2-time').value,pv=document.getElementById('t2-platform').value;
+  const active=[tv,pv].filter(v=>v!=='all').length;
+  document.getElementById('fstatus2').textContent=active>0?`${active} filter active`:'';
+  const[s,e]=getRange(tv);
+  initOnlineCharts(s,e);
+  // platform highlight
+  document.querySelectorAll('#tab1 .mr').forEach(r=>{r.style.opacity=pv==='all'?'1':'0.3';});
+  if(pv!=='all'){const pMap={facebook:['Facebook CPM','Facebook CPC','Facebook CPE'],tiktok:['TikTok Ads'],youtube:['Youtube TrueView'],gdn:['GDN Ads'],adx:['AdX Collection'],banner:['CPD Center PC','CPD Article MB'],vnexpress:['VnExpress U-BG'],pr:['PR'],koc:['KOC']};const targets=pMap[pv]||[];document.querySelectorAll('#tab1 .mr').forEach(r=>{const nm=r.querySelector('.mname')?.textContent||'';if(targets.some(t=>nm.includes(t)))r.style.opacity='1';});}
+}
+function resetT2(){['t2-time','t2-platform'].forEach(id=>document.getElementById(id).value='all');document.getElementById('fstatus2').textContent='';initOnlineCharts();document.querySelectorAll('#tab1 .mr').forEach(r=>r.style.opacity='1');}
+
+function t2ChartFilter(){
+  const tv=document.getElementById('t2-chart-time').value;
+  const[s,e]=getRange(tv);
+  initOnlineCharts(s,e);
+}
+
+function t2LeadFilter(){
+  const tv=document.getElementById('t2-lead-time').value;
+  const[s,e]=getRange(tv);
+  const lbl=DL.slice(s,e+1);
+  const ch=charts['t2-leadChart'];if(!ch)return;
+  ch.data.labels=lbl;ch.data.datasets[0].data=qlD.slice(s,e+1);ch.update('active');
+}
+
+function t3Filter(){
+  const tv=document.getElementById('t3-time').value,cv=document.getElementById('t3-channel').value,rv=document.getElementById('t3-region').value;
+  const active=[tv,cv,rv].filter(v=>v!=='all').length;
+  document.getElementById('fstatus3').textContent=active>0?`${active} filter active`:'';
+  const[s,e]=getRange3(tv);
+  initOfflineCharts(s,e);
+  document.querySelectorAll('#tab2 .regr').forEach(r=>{const n=r.querySelector('.regname')?.textContent||'';r.style.opacity=(rv==='all')||(rv==='hn'&&n.includes('Nội'))||(rv==='hcm'&&n.includes('Minh'))?'1':'0.3';});
+}
+function resetT3(){['t3-time','t3-channel','t3-region'].forEach(id=>document.getElementById(id).value='all');document.getElementById('fstatus3').textContent='';initOfflineCharts();document.querySelectorAll('#tab2 .regr').forEach(r=>r.style.opacity='1');}
+
+function t3ChartFilter(){
+  const tv=document.getElementById('t3-chart-time').value;
+  const[s,e]=getRange3(tv);
+  initOfflineCharts(s,e);
+}
+function t3RegFilter(){
+  const tv=document.getElementById('t3-reg-time').value;
+  const[s,e]=getRange3(tv);
+  const ch=charts['t3-regionChart'];if(!ch)return;
+  const DL3=Array.from({length:47},(_,i)=>{const d=new Date(2026,2,1);d.setDate(d.getDate()+i);return`${d.getDate()}/${d.getMonth()+1}`;});
+  ch.data.labels=DL3.slice(s,e+1);ch.data.datasets[0].data=hnT.slice(s,e+1);ch.data.datasets[1].data=hcmT.slice(s,e+1);ch.update('active');
+}
+
+// ── PROGRESS ──
+setTimeout(()=>{document.querySelectorAll('[data-w]').forEach(el=>el.style.width=el.dataset.w);},400);
+
+document.getElementById('logo-img').src='data:image/png;base64,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qB11d9XnK8XLkW6JrnwYci/Tj2qrtXCI2sQzdxjukw/bJf2auVp/wD6/k7VFa+nbb3FztpzidSTvJQRyHgx3yKnZORXkXJrqcn1DOu596btf0jlD5RcghmPCKT90rtUNouldKI6S31MzidPFiJHxnksMUzM7Ihp0266p2UxtdNjXPeGMaXOcdAAN5KnbLHCjcP2vwiqYPbGpaDIf+m3kwfX3+ZeRlzl8+2VLLregx1SzfDADqIz8Inmfo+iR1YdNwJt/1bkb/BfOjuiVY/8Ac342VeEcvP5iIimVuEREBR9m/hb2yoPbmij1q6Zv4VrRvkj+0fRr3KQUIBBBGoKw37NN+3NFXi1M3Dt5lmqzc4T6eaq6KUcc5a1BqpK/DzWvY87TqUkNLTz2Sd2nco9qLNd6d5ZPbKyNw4h0Lh9SqV/Fu2atlUOW5mmZOJXNFymfn4S6CLsOoa1vGjqB54yvh1PUN91BKPOwrB1ZaM0VR4Jdyixd4dTtsVxl/Gom/i73H8owe984+jzKRlV6mlqaOpjqYHSRTRuDmOG4gjgrHYUr6q54doq6sgMFRNHq9hGm/UjXTv01+NWTS8ubtPZ1cY/06F0a1SrJtzj3O9THHy94emiIpZaRERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERB//Z';
+
+// ── INIT ──
+window.addEventListener('load',initAll);
+</script>
+</body>
+</html>
